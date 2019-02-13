@@ -131,6 +131,7 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 			'Address',
 			'City',
 			'Province',
+			'Email',
 		],
 		path: 'Data.csv'
 	});
@@ -148,7 +149,7 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 				'--disable-gpu',
 				'--window-size=1920x1080'
 			],
-			headless: true,
+			headless: false,
 		},
 		timeout: 120000
 	})
@@ -160,7 +161,7 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 	}
 	await cluster.task(async ({ page, data: data }) => {
 		await preparePageForTests(page);
-		await page.setExtraHTTPHeaders({ 'Cookie': '_ga=GA1.2.1787252445.1549643291; PHPSESSID=n4e1crmtlvp2vqum3d5hra5l70; _gid=GA1.2.331480867.1549776478' });
+		await page.setExtraHTTPHeaders({ 'Cookie': 'PHPSESSID=c8j93udmtl833ilmfuejs7ban2; _ga=GA1.2.2021110956.1550034768; _gid=GA1.2.670101780.1550034768' });
 		await page.goto(data.url, { timeout: 120000 });
 		if (!data.dataUrl) {
 			await page.waitForXPath('//li/a[text()="View Details"]')
@@ -185,6 +186,14 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 			} else
 				first_name = full_name
 
+			const officeDetail = await dataHelper(page, '//a[text()="Office Details"]', 'href')
+			console.log(officeDetail);
+			let email = ''
+			if (officeDetail) {
+				await page.goto(officeDetail, { timeout: 120000 });
+				email = await dataHelper(page, '//a[contains(@href, "mailto")]', 'textContent');
+			}
+			
 			dataArray.push([
 				data.url,
 				full_name,
@@ -193,6 +202,7 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 				address,
 				'',
 				'',
+				email,
 			]);
 			console.log(data.url);
 		}

@@ -121,7 +121,8 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 
 (async () => {
 	const dataArray = [];
-	const pageUrls = (await readCSVData('urls2.csv')).map(row => row[0]);
+	const pageUrls = (await readCSVData('urls2.csv'))
+	.map(row => row[0]);
 	const writer = createCsvWriter({
 		header: [
 			'Url',
@@ -131,6 +132,7 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 			'Address',
 			'City',
 			'Province',
+			'Email',
 		],
 		path: 'Data2.csv'
 	});
@@ -148,7 +150,7 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 				'--disable-gpu',
 				'--window-size=1920x1080'
 			],
-			headless: true,
+			headless: false,
 		},
 		timeout: 120000
 	})
@@ -186,6 +188,14 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 				} else
 					first_name = full_name
 	
+				const officeDetail = await dataHelper(page, '//a[text()="Office Details"]', 'href')
+				console.log('Office Url', officeDetail);
+				let email = ''
+				if (officeDetail) {
+					await page.goto(officeDetail, { timeout: 120000 });
+					email = await dataHelper(page, '//a[contains(@href, "mailto")]', 'textContent');
+				}
+					
 				dataArray.push([
 					data.url,
 					full_name,
@@ -194,6 +204,7 @@ const dataHelper = async (page, selector, selection, parent, index = 0, merge = 
 					address,
 					'',
 					'',
+					email,
 				]);
 				console.log(data.url);
 			}	
